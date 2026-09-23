@@ -1,0 +1,18 @@
+[Unit]
+Description=Laya MCP Resident Service (GPU System 1 Decision Daemon)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Services/laya-mcp
+ExecStart=%h/Services/laya-mcp/.venv/bin/laya-mcp daemon --port 28005
+Environment=PYTHONUNBUFFERED=1
+Environment=LAYA_DEVICE=cuda
+Environment=LAYA_PRELOAD=english,multilingual
+Environment=LAYA_MCP_PORT=28005
+Environment=LAYA_MCP_HOST=127.0.0.1
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target
