@@ -19,7 +19,7 @@ uv tool install --force "git+${REPO}"
 
 TOOL_DIR="$(uv tool dir)/laya-mcp"
 TOOL_PY="${TOOL_DIR}/bin/python"
-if command -v nvidia-smi >/dev/null 2>&1 && [[ -x "${TOOL_PY}" ]]; then
+if command -v nvidia-smi >/dev/null 2>&1 && [ -x "${TOOL_PY}" ]; then
   echo "NVIDIA GPU detected. Installing the CUDA build of PyTorch…"
   if ! uv pip install --python "${TOOL_PY}" torch --index-url https://download.pytorch.org/whl/cu124; then
     uv pip install --python "${TOOL_PY}" torch --index-url https://download.pytorch.org/whl/cu121
