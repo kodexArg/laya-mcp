@@ -50,6 +50,30 @@ La primera llamada baja los checkpoints `english` y `multilingual`. Con NVIDIA, 
 
 `state` es el texto o documento. `instructions` es la pregunta. `model` es opcional (`english` o `multilingual`).
 
+## Ejemplo
+
+Con el MCP conectado, pedile esto al modelo:
+
+> Llamá `laya_health`. Después clasificá con `laya_choice`: state = "Tengo un error en el pago de mi tarjeta", instructions = "¿A qué área corresponde?", criteria = soporte_pagos ("facturas, cobros y tarjetas") y tecnico ("bugs de software").
+
+La llamada que hace el modelo es esta:
+
+```json
+{
+  "name": "laya_choice",
+  "arguments": {
+    "state": "Tengo un error en el pago de mi tarjeta",
+    "instructions": "¿A qué área corresponde?",
+    "criteria": {
+      "soporte_pagos": "facturas, cobros y tarjetas",
+      "tecnico": "bugs de software"
+    }
+  }
+}
+```
+
+`laya_choice` devuelve la categoría elegida (`soporte_pagos` en este texto) y las probabilidades. `laya_health` devuelve si hay CUDA y qué checkpoints están cargados.
+
 ## Desarrollo
 
 ```bash
