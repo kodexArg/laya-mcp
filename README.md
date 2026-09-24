@@ -1,6 +1,6 @@
 # laya-mcp
 
-Servidor MCP de [laya](https://pypi.org/project/laya/): decisiones locales (`choice`, `score`, `noul`) en GPU o CPU. Licencia MIT.
+Servidor MCP de [laya](https://pypi.org/project/laya/): decisiones locales (`choice`, `score`, `noul`) en GPU. Licencia MIT. Requiere CUDA ya instalado. El instalador no instala el driver ni wheels CUDA.
 
 ## Instalar y conectar
 
@@ -37,7 +37,7 @@ Sin instalar el binario, un cliente que ya tenga `uv` puede arrancar el servidor
 }
 ```
 
-La primera llamada baja los checkpoints `english` y `multilingual`. Con NVIDIA, el instalador cambia PyTorch al wheel CUDA (`cu124`, si falla `cu121`). Sin GPU corre en CPU.
+La primera llamada baja los checkpoints `english` y `multilingual`. Si `nvidia-smi` no está, o si PyTorch no ve CUDA, la instalación se aborta.
 
 ## Herramientas
 
@@ -78,12 +78,11 @@ La llamada que hace el modelo es esta:
 
 ```bash
 uv sync
-./scripts/install_cuda_torch.sh   # solo si hay nvidia-smi
 uv run laya-mcp                   # stdio; si el daemon responde en :28005, hace de puente
 uv run laya-mcp daemon            # SSE en 127.0.0.1:28005 y modelos residentes
 ```
 
-Python `>=3.11`. `uv` instala el intérprete. Variables: `LAYA_DEVICE` (`cuda` o `cpu`), `LAYA_PRELOAD` (default `english,multilingual`), `LAYA_MCP_HOST`, `LAYA_MCP_PORT`.
+Python `>=3.11`. `uv` instala el intérprete. CUDA tiene que estar en la máquina antes. Variables: `LAYA_DEVICE` (`cuda`), `LAYA_PRELOAD` (default `english,multilingual`), `LAYA_MCP_HOST`, `LAYA_MCP_PORT`.
 
 ## skills/cowsay
 

@@ -8,7 +8,7 @@ from typing import Any
 
 import torch
 
-LAYA_DEVICE = os.getenv("LAYA_DEVICE", "cuda" if torch.cuda.is_available() else "cpu")
+LAYA_DEVICE = os.getenv("LAYA_DEVICE", "cuda")
 LAYA_PRELOAD = [
     m.strip()
     for m in os.getenv("LAYA_PRELOAD", "english,multilingual").split(",")
@@ -24,10 +24,11 @@ def get_router():
     if _router is None:
         from laya import Router
 
-        device = LAYA_DEVICE
-        if device == "cuda" and not torch.cuda.is_available():
-            device = "cpu"
-        _router = Router(device=device, max_loaded=max(2, len(LAYA_PRELOAD)))
+        if LAYA_DEVICE != "cuda" or not torch.cuda.is_available():
+            raise RuntimeError(
+                "laya-mcp requires CUDA already available. It does not install the NVIDIA driver or CUDA wheels."
+            )
+        _router = Router(device="cuda", max_loaded=max(2, len(LAYA_PRELOAD)))
         _router.preload(LAYA_PRELOAD)
     return _router
 

@@ -12,8 +12,8 @@ This document establishes the technical baseline, toolchains, package dependenci
 
 - **Video Card**: Any NVIDIA GPU architecture supported by modern CUDA and PyTorch. Specific video card model does not matter as long as dedicated VRAM satisfies the resident model budget (minimum ~4 GB dedicated VRAM; ~3 GB allocated for preloaded `english` and `multilingual` checkpoints).
 - **NVIDIA Driver**: `>= 615.71.09`.
-- **CUDA Runtime / UMD**: CUDA `13.4` / `13.0` (`cu130` / fallback `cu124`).
-- **PyTorch CUDA Wheel**: `torch >= 2.14.0` built against CUDA (e.g., `torch==2.14.0+cu130`).
+- **CUDA**: already installed on the host. `nvidia-smi` must work. This project does not install the NVIDIA driver, the CUDA toolkit, or PyTorch CUDA wheels.
+- **PyTorch**: `torch >= 2.14.0` with `torch.cuda.is_available()` true. `laya` pulls it in; the installer does not swap the wheel.
 
 ## 3. Core Software Dependencies
 

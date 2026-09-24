@@ -14,16 +14,19 @@ if ! command -v uv >/dev/null 2>&1; then
   export PATH="${HOME}/.local/bin:${PATH}"
 fi
 
+if ! command -v nvidia-smi >/dev/null 2>&1; then
+  echo "laya-mcp requires CUDA already installed (nvidia-smi). This installer does not install the driver or CUDA." >&2
+  exit 1
+fi
+
 echo "Installing laya-mcp from ${REPO}…"
 uv tool install --force "git+${REPO}"
 
-TOOL_DIR="$(uv tool dir)/laya-mcp"
-TOOL_PY="${TOOL_DIR}/bin/python"
-if command -v nvidia-smi >/dev/null 2>&1 && [ -x "${TOOL_PY}" ]; then
-  echo "NVIDIA GPU detected. Installing the CUDA build of PyTorch…"
-  if ! uv pip install --python "${TOOL_PY}" torch --index-url https://download.pytorch.org/whl/cu124; then
-    uv pip install --python "${TOOL_PY}" torch --index-url https://download.pytorch.org/whl/cu121
-  fi
+TOOL_PY="$(uv tool dir)/laya-mcp/bin/python"
+if ! "${TOOL_PY}" -c 'import sys, torch; sys.exit(0 if torch.cuda.is_available() else 1)'; then
+  echo "PyTorch does not see CUDA. laya-mcp does not install CUDA wheels or the NVIDIA driver." >&2
+  uv tool uninstall laya-mcp || true
+  exit 1
 fi
 
 BIN="$(command -v laya-mcp)"
