@@ -3,6 +3,12 @@
 #   curl -fsSL https://raw.githubusercontent.com/kodexArg/laya-mcp/main/install.sh | sh
 set -euo pipefail
 
+if ! command -v nvidia-smi >/dev/null 2>&1; then
+  echo "error: CUDA is required (nvidia-smi not found)." >&2
+  echo "laya-mcp does not install the NVIDIA driver or CUDA. Install CUDA, then rerun this script." >&2
+  exit 1
+fi
+
 REPO="${LAYA_REPO:-https://github.com/kodexArg/laya-mcp}"
 NAME="laya"
 
@@ -14,17 +20,13 @@ if ! command -v uv >/dev/null 2>&1; then
   export PATH="${HOME}/.local/bin:${PATH}"
 fi
 
-if ! command -v nvidia-smi >/dev/null 2>&1; then
-  echo "laya-mcp requires CUDA already installed (nvidia-smi). This installer does not install the driver or CUDA." >&2
-  exit 1
-fi
-
 echo "Installing laya-mcp from ${REPO}…"
 uv tool install --force "git+${REPO}"
 
 TOOL_PY="$(uv tool dir)/laya-mcp/bin/python"
 if ! "${TOOL_PY}" -c 'import sys, torch; sys.exit(0 if torch.cuda.is_available() else 1)'; then
-  echo "PyTorch does not see CUDA. laya-mcp does not install CUDA wheels or the NVIDIA driver." >&2
+  echo "error: CUDA is required, but PyTorch does not see it (torch.cuda.is_available() is false)." >&2
+  echo "laya-mcp does not install CUDA wheels or the NVIDIA driver. Fix the existing CUDA install, then rerun this script." >&2
   uv tool uninstall laya-mcp || true
   exit 1
 fi
