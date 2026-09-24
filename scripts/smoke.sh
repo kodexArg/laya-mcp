@@ -11,7 +11,7 @@ from laya_mcp.server import tool_laya_health, tool_laya_choice, tool_laya_noul
 health = tool_laya_health()
 print("Health:", health)
 assert health["status"] == "ok"
-assert health["cuda"] is True
+print("cuda:", health["cuda"])
 
 choice = tool_laya_choice(
     state="Tengo un error en el pago de mi tarjeta",

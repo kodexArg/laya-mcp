@@ -4,8 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=%h/Services/laya-mcp
-ExecStart=%h/Services/laya-mcp/.venv/bin/laya-mcp daemon --port 28005
+ExecStart=%h/.local/bin/laya-mcp daemon --port 28005
 Environment=PYTHONUNBUFFERED=1
 Environment=LAYA_DEVICE=cuda
 Environment=LAYA_PRELOAD=english,multilingual

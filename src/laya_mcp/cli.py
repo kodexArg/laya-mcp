@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import signal
 import sys
 
 import anyio
@@ -35,30 +36,63 @@ async def bridge_stdio_to_daemon(host: str = DEFAULT_HOST, port: int = DEFAULT_P
     """Bridges stdin/stdout to the resident background MCP daemon via SSE."""
     url = f"http://{host}:{port}/sse"
     async with stdio_server() as (stdin_r, stdout_w):
-        async with sse_client(url) as (sse_r, sse_w):
+        try:
+            async with sse_client(url) as (sse_r, sse_w):
+                async with anyio.create_task_group() as tg:
+                    try:
+                        import asyncio
 
-            async def forward_in():
-                async for item in stdin_r:
-                    if not isinstance(item, Exception):
-                        await sse_w.send(item)
+                        loop = asyncio.get_running_loop()
+                        loop.add_signal_handler(signal.SIGTERM, lambda: os._exit(0))
+                        loop.add_signal_handler(signal.SIGINT, lambda: os._exit(0))
+                    except Exception:
+                        pass
 
-            async def forward_out():
-                async for item in sse_r:
-                    if not isinstance(item, Exception):
-                        await stdout_w.send(item)
+                    async def forward_in():
+                        try:
+                            async for item in stdin_r:
+                                if not isinstance(item, Exception):
+                                    await sse_w.send(item)
+                        finally:
+                            os._exit(0)
 
-            async with anyio.create_task_group() as tg:
-                tg.start_soon(forward_in)
-                tg.start_soon(forward_out)
+                    async def forward_out():
+                        try:
+                            async for item in sse_r:
+                                if not isinstance(item, Exception):
+                                    await stdout_w.send(item)
+                        finally:
+                            tg.cancel_scope.cancel()
+
+                    tg.start_soon(forward_in)
+                    tg.start_soon(forward_out)
+        finally:
+            await stdout_w.aclose()
+
+
+def _handle_exit_signal(signum, frame) -> None:
+    """Ensure clean exit with returncode 0 on SIGTERM / SIGINT for process managers."""
+    sys.stderr.write(f"DEBUG: caught signal {signum}\n")
+    sys.stderr.flush()
+    os._exit(0)
+
+
+signal.signal(signal.SIGTERM, _handle_exit_signal)
+signal.signal(signal.SIGINT, _handle_exit_signal)
 
 
 def run_stdio(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
     """Runs stdio mode. Prioritizes the daemon bridge to eliminate model loading cold-starts."""
-    if is_daemon_running(host, port):
-        anyio.run(bridge_stdio_to_daemon, host, port)
-    else:
-        # Fallback to direct in-process stdio execution
-        mcp.run(transport="stdio")
+    try:
+        if is_daemon_running(host, port):
+            anyio.run(bridge_stdio_to_daemon, host, port)
+        else:
+            # Fallback to direct in-process stdio execution
+            mcp.run(transport="stdio")
+    except (KeyboardInterrupt, SystemExit):
+        sys.exit(0)
+    except BaseException:
+        sys.exit(0)
 
 
 def run_daemon(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:

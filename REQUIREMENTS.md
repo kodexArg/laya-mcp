@@ -4,7 +4,7 @@ This document establishes the technical baseline, toolchains, package dependenci
 
 ## 1. Runtime & Environment
 
-- **Python**: `3.14` (verified and pinned on `cpython-3.14.x`).
+- **Python**: `>=3.11` (`uv` downloads a compatible interpreter; this host uses 3.14).
 - **Package & Virtualenv Manager**: `uv` (`~/.local/bin/uv`).
 - **Service Supervisor**: `systemd` (user manager `systemctl --user`).
 
