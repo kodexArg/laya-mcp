@@ -60,3 +60,13 @@ uv run laya-mcp daemon            # SSE en 127.0.0.1:28005 y modelos residentes
 ```
 
 Python `>=3.11`. `uv` instala el intérprete. Variables: `LAYA_DEVICE` (`cuda` o `cpu`), `LAYA_PRELOAD` (default `english,multilingual`), `LAYA_MCP_HOST`, `LAYA_MCP_PORT`.
+
+## skills/cowsay
+
+ASCII determinista, solo stdlib, MIT. Entra en el repo. No depende del servidor MCP.
+
+```bash
+./skills/cowsay/bin/cowsay -l
+printf '%s' 'listo' | ./skills/cowsay/bin/cowsay
+./scripts/notify-action.sh "listo"
+```
