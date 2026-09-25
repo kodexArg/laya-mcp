@@ -9,16 +9,22 @@ if ! command -v nvidia-smi >/dev/null 2>&1; then
   exit 1
 fi
 
-REPO="${LAYA_REPO:-https://github.com/kodexArg/laya-mcp}"
-NAME="laya"
-
 export PATH="${HOME}/.local/bin:${PATH}"
 
 if ! command -v uv >/dev/null 2>&1; then
-  echo "Installing uv…"
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-  export PATH="${HOME}/.local/bin:${PATH}"
+  echo "error: uv is required and was not found on PATH." >&2
+  echo "laya-mcp does not install uv. Install uv, then rerun this script." >&2
+  exit 1
 fi
+
+if ! command -v systemctl >/dev/null 2>&1; then
+  echo "error: systemctl is required and was not found on PATH." >&2
+  echo "laya-mcp does not install systemd. Install it, then rerun this script." >&2
+  exit 1
+fi
+
+REPO="${LAYA_REPO:-https://github.com/kodexArg/laya-mcp}"
+NAME="laya"
 
 echo "Installing laya-mcp from ${REPO}…"
 uv tool install --force "git+${REPO}"
@@ -32,9 +38,8 @@ if ! "${TOOL_PY}" -c 'import sys, torch; sys.exit(0 if torch.cuda.is_available()
 fi
 
 BIN="$(command -v laya-mcp)"
-if command -v systemctl >/dev/null 2>&1; then
-  mkdir -p "${HOME}/.config/systemd/user"
-  cat > "${HOME}/.config/systemd/user/laya-mcp.service" <<EOF
+mkdir -p "${HOME}/.config/systemd/user"
+cat > "${HOME}/.config/systemd/user/laya-mcp.service" <<EOF
 [Unit]
 Description=laya-mcp resident GPU decision server
 After=network.target
@@ -51,9 +56,8 @@ RestartSec=5s
 [Install]
 WantedBy=default.target
 EOF
-  systemctl --user daemon-reload || true
-  systemctl --user enable --now laya-mcp.service || true
-fi
+systemctl --user daemon-reload
+systemctl --user enable --now laya-mcp.service
 
 if command -v grok >/dev/null 2>&1; then
   grok mcp add "${NAME}" -- laya-mcp || true

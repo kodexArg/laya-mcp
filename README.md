@@ -4,7 +4,7 @@ Servidor MCP de [laya](https://pypi.org/project/laya/): decisiones locales (`cho
 
 ## Instalar y conectar
 
-Una línea. Instala el comando `laya-mcp`, deja el daemon de usuario si hay systemd, y si `grok` está en el PATH lo registra como servidor MCP `laya`.
+Una línea. Exige `nvidia-smi`, `uv` y `systemctl` ya instalados, y que PyTorch vea CUDA. Si falta alguno, informa y sale. Instala el comando `laya-mcp`, activa el daemon de usuario y, si `grok` está en el PATH, lo registra como servidor MCP `laya`.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/kodexArg/laya-mcp/main/install.sh | sh
@@ -37,7 +37,7 @@ Sin instalar el binario, un cliente que ya tenga `uv` puede arrancar el servidor
 }
 ```
 
-La primera llamada baja los checkpoints `english` y `multilingual`. Si `nvidia-smi` no está, o si PyTorch no ve CUDA, la instalación se aborta.
+La primera llamada baja los checkpoints `english` y `multilingual`. Si falta `nvidia-smi`, `uv` o `systemctl`, o si PyTorch no ve CUDA, la instalación se aborta.
 
 ## Herramientas
 
